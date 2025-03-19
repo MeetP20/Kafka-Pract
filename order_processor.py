@@ -2,23 +2,18 @@ from kafka import KafkaConsumer, KafkaProducer
 import json
 import time
 
-# Kafka configurations
 ORDERDATA_TOPIC = "orderdata"
 INSERT_TOPIC = "insert"
 MAILS_TOPIC = "mails"
 
-# Simulating stock (for one product)
-STOCK = 20  # Adjust stock as needed
+STOCK = 20  
 
-# Kafka Producer (for sending messages)
-KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port"  # Example: "your-project.aivencloud.com:12345"
+KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port"
 
-# SSL Certificates from Aiven
-SSL_CERT = "/path/to/service.cert"  # Update with actual path
+SSL_CERT = "/path/to/service.cert" 
 SSL_KEY = "/path/to/service.key"
 SSL_CA = "/path/to/ca.pem"
 
-# Create Kafka Producer
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
     security_protocol="SSL",
@@ -29,28 +24,23 @@ producer = KafkaProducer(
 )
 
 def process_order(order):
-    global STOCK  # Access global stock
+    global STOCK 
     email = order["email"]
     product = order["product"]
     quantity = order["quantity"]
 
     if STOCK >= quantity:
-        STOCK -= quantity  # Deduct stock
+        STOCK -= quantity 
         print(f"Order confirmed for {email}, Remaining stock: {STOCK}")
-
-        # Publish order details to the insert topic
         producer.send(INSERT_TOPIC, value=order)
         producer.flush()
 
     else:
         print(f"Order failed for {email}, product out of stock.")
-        
-        # Notify user of failure
         mail_data = {"email": email, "status": "Out of Stock"}
         producer.send(MAILS_TOPIC, value=mail_data)
         producer.flush()
 
-# Kafka Consumer (for receiving orders)
 consumer = KafkaConsumer(
     ORDERDATA_TOPIC,
     security_protocol="SSL",
@@ -66,16 +56,15 @@ consumer = KafkaConsumer(
 
 print("Order Processor is running...")
 
-# Listen for new orders
 while True:
-    messages = consumer.poll(timeout_ms=500)
-    if not messages:  # If no messages, continue polling
+    messages = consumer.poll(timeout_ms=1000)
+    if not messages:
         continue  
 
-    for records in messages.values():  # Get list of messages
-        for record in records:
+    for message in messages.values(): 
+        for record in message:
             try:
-                order = json.loads(record.value)  # Extract message data
+                order = json.loads(record.value)
                 print(f"Received order: {order}")
                 process_order(order)
                 consumer.commit()

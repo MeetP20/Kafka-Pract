@@ -2,10 +2,8 @@ from kafka import KafkaConsumer, KafkaProducer
 import psycopg2
 import json
 
-# Kafka Configuration
-KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port"  # Example: "your-project.aivencloud.com:12345"
+KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port" 
 
-# SSL Certificates from Aiven
 SSL_CERT = "/path/to/service.cert"  # Update with actual path
 SSL_KEY = "/path/to/service.key"
 SSL_CA = "/path/to/ca.pem"
@@ -13,7 +11,6 @@ SSL_CA = "/path/to/ca.pem"
 INSERT_TOPIC = "insert"
 MAILS_TOPIC = "mails"
 
-# PostgreSQL Configuration
 DB_CONFIG = {
     "dbname": "your_database",
     "user": "your_user",
@@ -22,7 +19,6 @@ DB_CONFIG = {
     "port": "your_db_port"
 }
 
-# Initialize Kafka Consumer
 consumer = KafkaConsumer(
     INSERT_TOPIC,
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
@@ -36,7 +32,6 @@ consumer = KafkaConsumer(
     group_id="inserter"
 )
 
-# Initialize Kafka Producer
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
     security_protocol="SSL",
@@ -47,7 +42,6 @@ producer = KafkaProducer(
 )
 
 def insert_order(email, address, product, quantity):
-    """ Inserts order details into PostgreSQL database """
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
@@ -63,17 +57,16 @@ def insert_order(email, address, product, quantity):
 
 print("Inserter Microservice is running...")
 
-# Consume messages from the insert topic
 while True:
-    messages = consumer.poll(timeout_ms=1000)  # Poll messages
+    messages = consumer.poll(timeout_ms=1000)
 
-    if not messages:  # If no messages, continue polling
+    if not messages:  
         continue  
 
-    for records in messages.values():  # Get list of messages
-        for record in records:
+    for message in messages.values():
+        for record in message:
             try:
-                order_data = json.loads(record.value)  # Extract message data
+                order_data = json.loads(record.value)
 
                 email = order_data["email"]
                 address = order_data["address"]
@@ -83,7 +76,6 @@ while True:
                 print(f"Inserting order: {order_data}")
 
                 if insert_order(email, address, product, quantity):
-                    # Publish success message to mails topic
                     mail_data = {"email": email, "status": "Order Placed Successfully"}
                     producer.send(MAILS_TOPIC, value=mail_data)
                     producer.flush()
@@ -92,9 +84,7 @@ while True:
                 
                 else:
                     print(f"Failed to insert order: {order_data}")
-
-                # Commit offset after processing
-            
+                                
             except Exception as e:
                 print(f"Error processing order: {e}")
 
