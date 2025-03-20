@@ -12,11 +12,11 @@ INSERT_TOPIC = "insert"
 MAILS_TOPIC = "mails"
 
 DB_CONFIG = {
-    "dbname": "your_database",
-    "user": "your_user",
-    "password": "your_password",
-    "host": "your_db_host",
-    "port": "your_db_port"
+    "dbname": "test_db",
+    "user": "admin",
+    "password": "root",
+    "host": "localhost",
+    "port": 5432
 }
 
 # consumer = KafkaConsumer(
@@ -56,22 +56,18 @@ consumer = KafkaConsumer(
 def insert_order(order_data):
     try:
         order_data = json.loads(order_data)
-        email = order_data["email"]
-        product = order_data["product"]
-        address = order_data["address"]
-        quantity = int(order_data["quantity"])
+        Email = order_data["email"]
+        Product = order_data["product"]
+        Address = order_data["address"]
+        Quantity = int(order_data["quantity"])
 
-        print(email)
-        print(product)
-        print(address)
-        print(quantity)
-        # conn = psycopg2.connect(**DB_CONFIG)
-        # cur = conn.cursor()
-        # query = "INSERT INTO orders (email, address, product, quantity) VALUES (%s, %s, %s, %s)"
-        # cur.execute(query, (email, address, product, quantity))
-        # conn.commit()
-        # cur.close()
-        # conn.close()
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        query = "INSERT INTO kafka (Email, Address, Product, Quantity) VALUES (%s, %s, %s, %s)"
+        cur.execute(query, (Email, Address, Product, Quantity))
+        conn.commit()
+        cur.close()
+        conn.close()
         print("Record inserted")
         return True
     except Exception as e:
