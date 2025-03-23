@@ -50,21 +50,21 @@ consumer = KafkaConsumer(
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     auto_offset_reset="earliest",
     enable_auto_commit=False,
-    group_id="order-processor" 
+    group_id="inserter" 
 )
 
 def insert_order(order_data):
     try:
         order_data = json.loads(order_data)
-        Email = order_data["email"]
-        Product = order_data["product"]
-        Address = order_data["address"]
-        Quantity = int(order_data["quantity"])
+        email = order_data["email"]
+        product = order_data["product"]
+        address = order_data["address"]
+        quantity = int(order_data["quantity"])
 
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
-        query = "INSERT INTO kafka (Email, Address, Product, Quantity) VALUES (%s, %s, %s, %s)"
-        cur.execute(query, (Email, Address, Product, Quantity))
+        query = "INSERT INTO kafka (email, address, product, quantity) VALUES (%s, %s, %s, %s)"
+        cur.execute(query, (email, address, product, quantity))
         conn.commit()
         cur.close()
         conn.close()
@@ -104,7 +104,7 @@ while True:
                         print(f"❌ Unexpected error: {e}")
                     producer.flush()
 
-                    print(f"Inserted order and notified user: {email}")
+                    print(f"Inserted order and will notify user {email} via mail")
                     consumer.commit()
                 
                 else:

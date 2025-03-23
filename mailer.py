@@ -11,17 +11,26 @@ SSL_CA = "/path/to/ca.pem"
 
 MAILS_TOPIC = "mails"
 
+# consumer = KafkaConsumer(
+#     MAILS_TOPIC,
+#     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+#     security_protocol="SSL",
+#     ssl_cafile=SSL_CA,
+#     ssl_certfile=SSL_CERT,
+#     ssl_keyfile=SSL_KEY,
+#     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+#     auto_offset_reset="earliest",
+#     enable_auto_commit=True,
+#     group_id="mailer"
+# )
+
 consumer = KafkaConsumer(
     MAILS_TOPIC,
-    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-    security_protocol="SSL",
-    ssl_cafile=SSL_CA,
-    ssl_certfile=SSL_CERT,
-    ssl_keyfile=SSL_KEY,
+    bootstrap_servers='localhost:29092',
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     auto_offset_reset="earliest",
     enable_auto_commit=True,
-    group_id="inserter"
+    group_id="mailer"
 )
 
 def send_mail(email, msg):
@@ -50,7 +59,7 @@ def send_mail(email, msg):
 print("Mailer Microservice is running...")
 
 while True:
-    order_data = consumer.poll(timeout_ms=1000)
+    messages = consumer.poll(timeout_ms=1000)
 
     if not messages:  
         continue  
@@ -58,13 +67,13 @@ while True:
     for message in messages.values():
         for record in message:
             try:
-                mail_data = json.loads(record.value)
+                
+                mail_value = json.dumps(record.value)
+                mail_data = json.loads(mail_value)
 
                 email = mail_data["email"]
                 msg = mail_data["status"]
-
-                print(f"Inserting order: {mail_data}")
-
+                
                 if send_mail(email, msg):
                     print(f"Email sent and notified user: {email}")
                     consumer.commit()
@@ -73,4 +82,4 @@ while True:
                     print(f"Failed to send mail to user: {email}")
                                 
             except Exception as e:
-                print(f"Error processing order: {e}")
+                print(f"Error Mailing User: {e}")

@@ -6,7 +6,7 @@ ORDERDATA_TOPIC = "ordertopic"
 INSERT_TOPIC = "insert"
 MAILS_TOPIC = "mails"
 
-STOCK = 3
+# STOCK = 3
 
 KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port"
 
@@ -15,7 +15,12 @@ SSL_KEY = "/path/to/service.key"
 SSL_CA = "/path/to/ca.pem"
 
 def process_order(order):
-    global STOCK 
+
+    with open("stock.json", "r") as file:
+        data = json.load(file)
+
+    STOCK = data["count"]
+
     orders = json.loads(order)
     email = orders["email"]
     product = orders["product"]
@@ -23,6 +28,11 @@ def process_order(order):
 
     if STOCK >= quantity:
         STOCK -= quantity 
+        data["count"] = STOCK
+        
+        with open("stock.json", "w") as file:
+            json.dump(data, file, indent=4)
+
         print(f"Order confirmed for {email}, Remaining stock: {STOCK}")
         future = producer.send(INSERT_TOPIC, orders)
         try:
