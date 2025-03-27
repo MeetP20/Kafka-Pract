@@ -1,25 +1,10 @@
 from flask import Flask, request, jsonify
 from kafka import KafkaProducer
 import json
-import credential
 from flask_cors import CORS
 from kafka import KafkaAdminClient
 
-KAFKA_BOOTSTRAP_SERVERS = credential.kafka_service_uri  
-
-SSL_CERT = "/path/to/service.cert"  
-SSL_KEY = "/path/to/service.key"
-SSL_CA = "/path/to/ca.pem"
-
-# producer = KafkaProducer(
-#     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-#     security_protocol="SSL",
-#     ssl_cafile=SSL_CA,
-#     ssl_certfile=SSL_CERT,
-#     ssl_keyfile=SSL_KEY,
-#     value_serializer=lambda v: json.dumps(v).encode('utf-8')
-# )
-producer = KafkaProducer(bootstrap_servers='localhost:29092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='kafka1:9092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 app = Flask(__name__)
 CORS(app, resources={r"/order": {"origins": "*"}})
@@ -55,4 +40,4 @@ def order():
     producer.flush()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", debug=True, port=5000)

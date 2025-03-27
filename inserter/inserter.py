@@ -2,51 +2,23 @@ from kafka import KafkaConsumer, KafkaProducer
 import psycopg2
 import json
 
-KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port" 
-
-SSL_CERT = "/path/to/service.cert"  # Update with actual path
-SSL_KEY = "/path/to/service.key"
-SSL_CA = "/path/to/ca.pem"
-
 INSERT_TOPIC = "insert"
 MAILS_TOPIC = "mails"
 
 DB_CONFIG = {
-    "dbname": "test_db",
+    "dbname": "kafka",
     "user": "admin",
     "password": "root",
-    "host": "localhost",
+    "host": "postgres",
     "port": 5432
 }
 
-# consumer = KafkaConsumer(
-#     INSERT_TOPIC,
-#     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-#     security_protocol="SSL",
-#     ssl_cafile=SSL_CA,
-#     ssl_certfile=SSL_CERT,
-#     ssl_keyfile=SSL_KEY,
-#     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-#     auto_offset_reset="earliest",
-#     enable_auto_commit=False,
-#     group_id="inserter"
-# )
-
-# producer = KafkaProducer(
-#     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-#     security_protocol="SSL",
-#     ssl_cafile=SSL_CA,
-#     ssl_certfile=SSL_CERT,
-#     ssl_keyfile=SSL_KEY,
-#     value_serializer=lambda v: json.dumps(v).encode("utf-8")
-# )
-
-producer = KafkaProducer(bootstrap_servers='localhost:29092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='kafka1:9092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 
 consumer = KafkaConsumer(
     INSERT_TOPIC,
-    bootstrap_servers='localhost:29092',
+    bootstrap_servers='kafka1:9092',
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     auto_offset_reset="earliest",
     enable_auto_commit=False,

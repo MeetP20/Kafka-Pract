@@ -6,14 +6,6 @@ ORDERDATA_TOPIC = "ordertopic"
 INSERT_TOPIC = "insert"
 MAILS_TOPIC = "mails"
 
-# STOCK = 3
-
-KAFKA_BOOTSTRAP_SERVERS = "your-aiven-kafka-host:your-port"
-
-SSL_CERT = "/path/to/service.cert" 
-SSL_KEY = "/path/to/service.key"
-SSL_CA = "/path/to/ca.pem"
-
 def process_order(order):
 
     with open("stock.json", "r") as file:
@@ -60,24 +52,12 @@ def process_order(order):
 
         producer.flush()
 
-# consumer = KafkaConsumer(
-#     ORDERDATA_TOPIC,
-#     security_protocol="SSL",
-#     ssl_cafile=SSL_CA,
-#     ssl_certfile=SSL_CERT,
-#     ssl_keyfile=SSL_KEY,
-#     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-#     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-#     auto_offset_reset="earliest",
-#     enable_auto_commit=False,
-#     group_id="order-processor" 
-# )
-producer = KafkaProducer(bootstrap_servers='localhost:29092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='kafka1:9092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 
 consumer = KafkaConsumer(
     ORDERDATA_TOPIC,
-    bootstrap_servers='localhost:29092',
+    bootstrap_servers='kafka1:9092',
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     auto_offset_reset="earliest",
     enable_auto_commit=False,

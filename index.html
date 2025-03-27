@@ -54,20 +54,27 @@
             };
 
             // Call the API (using fetch)
-            fetch('http://127.0.0.1:5000/order', {
+            fetch('http://localhost:5000/order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(orderData)
             })
-            .then(response => response.text())  // Read response as plain text
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                return response.text(); // Read response as plain text
+            })
             .then(message => {
                 document.getElementById('responseMessage').innerText = message; // Display message
             })
             .catch(error => {
-                document.getElementById('responseMessage').innerText = 'Error placing order due to some internal issues , Please try again later';
+                console.error("Error:", error.message); // Log the actual error message to console
+                document.getElementById('responseMessage').innerText = `Error: ${error.message}`; // Show the error
             });
+
         });
     </script>
 

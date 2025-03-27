@@ -1,45 +1,27 @@
 from kafka import KafkaConsumer, KafkaProducer
 import smtplib
 import json
-import credential
-
-KAFKA_BOOTSTRAP_SERVERS = credential.kafka_service_uri  
-
-SSL_CERT = "/path/to/service.cert"  
-SSL_KEY = "/path/to/service.key"
-SSL_CA = "/path/to/ca.pem"
+import os
+from dotenv import load_dotenv, dotenv_values 
 
 MAILS_TOPIC = "mails"
 
-# consumer = KafkaConsumer(
-#     MAILS_TOPIC,
-#     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-#     security_protocol="SSL",
-#     ssl_cafile=SSL_CA,
-#     ssl_certfile=SSL_CERT,
-#     ssl_keyfile=SSL_KEY,
-#     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-#     auto_offset_reset="earliest",
-#     enable_auto_commit=True,
-#     group_id="mailer"
-# )
-
 consumer = KafkaConsumer(
     MAILS_TOPIC,
-    bootstrap_servers='localhost:29092',
+    bootstrap_servers='kafka1:9092',
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     auto_offset_reset="earliest",
-    enable_auto_commit=True,
+    enable_auto_commit=False,
     group_id="mailer"
 )
 
 def send_mail(email, msg):
     try:
-
+        load_dotenv()
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'prajapatimeet301@gmail.com'
-        smtp_password = credential.email_password
+        smtp_password =  os.getenv("email_password")
 
         from_email = 'prajapatimeet301@gmail.com'
         subject = 'Status of Order'
