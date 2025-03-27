@@ -23,7 +23,7 @@ cd Kafka-Pract
 
 ### 2️⃣ Start Services using Docker Compose
 ```bash
-docker-compose up --build -d
+docker-compose --build -d
 ```
 ```bash
 docker-compose up -d
