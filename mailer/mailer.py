@@ -20,7 +20,7 @@ def send_mail(email, msg):
         load_dotenv()
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
-        smtp_username = 'prajapatimeet301@gmail.com'
+        smtp_username = 'YOUR_EMAIL_ID'
         smtp_password =  os.getenv("email_password")
 
         from_email = 'prajapatimeet301@gmail.com'
