@@ -23,11 +23,7 @@ cd Kafka-Pract
 
 ### 2️⃣ Start Services using Docker Compose
 ```bash
-<<<<<<< HEAD
-docker-compose --build -d
-=======
 docker-compose --build
->>>>>>> refs/remotes/origin/main
 ```
 ```bash
 docker-compose up -d
