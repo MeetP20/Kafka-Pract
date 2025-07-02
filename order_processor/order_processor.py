@@ -13,6 +13,7 @@ def process_order(order):
 
     STOCK = data["count"]
 
+    
     orders = json.loads(order)
     email = orders["email"]
     product = orders["product"]
